@@ -1,0 +1,1944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AetherSense | IoT Environmental Monitoring</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.3.7/mqtt.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Premium font combination -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Enhanced color palette */
+            --primary: #3858FF;
+            --primary-light: #5b6ef9;
+            --primary-gradient: linear-gradient(135deg, #3858FF 0%, #8B5CF6 100%);
+            --secondary: #8B5CF6;
+            --accent: #FF5A7A;
+            --accent-light: #ff6f8a;
+            
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --info: #0EA5E9;
+            
+            /* Neutral color scale - refined */
+            --neutral-100: #FFFFFF;
+            --neutral-200: #F8FAFC;
+            --neutral-300: #F1F5F9;
+            --neutral-400: #E2E8F0;
+            --neutral-500: #CBD5E1;
+            --neutral-600: #94A3B8;
+            --neutral-700: #64748B;
+            --neutral-800: #475569;
+            --neutral-900: #334155;
+            --neutral-1000: #1E293B;
+            --neutral-1100: #0F172A;
+            
+            /* Semantic colors */
+            --text-primary: var(--neutral-1100);
+            --text-secondary: var(--neutral-800);
+            --text-tertiary: var(--neutral-600);
+            --bg-primary: var(--neutral-200);
+            --bg-secondary: var(--neutral-100);
+            --border-light: var(--neutral-400);
+            
+            /* Enhanced Glassmorphism */
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --glass-blur: blur(12px);
+            
+            /* Typography - refined scale with Outfit font */
+            --text-xs: 0.75rem;
+            --text-sm: 0.875rem;
+            --text-base: 1rem;
+            --text-lg: 1.125rem;
+            --text-xl: 1.25rem;
+            --text-2xl: 1.5rem;
+            --text-3xl: 1.875rem;
+            --text-4xl: 2.25rem;
+            --text-5xl: 3rem;
+            
+            /* Spacing - refined */
+            --spacing-1: 0.25rem;
+            --spacing-2: 0.5rem;
+            --spacing-3: 0.75rem;
+            --spacing-4: 1rem;
+            --spacing-5: 1.25rem;
+            --spacing-6: 1.5rem;
+            --spacing-8: 2rem;
+            --spacing-10: 2.5rem;
+            --spacing-12: 3rem;
+            --spacing-16: 4rem;
+            
+            /* Border radius - refined */
+            --radius-sm: 0.375rem;
+            --radius: 0.5rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.25rem;
+            --radius-2xl: 1.5rem;
+            
+            /* Shadows - enhanced */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-primary: 0 10px 15px -3px rgba(56, 88, 255, 0.15), 0 4px 6px -2px rgba(56, 88, 255, 0.05);
+            
+            /* Transitions */
+            --transition: all 0.2s ease;
+            --transition-slow: all 0.3s ease;
+            --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        .dark-mode {
+            --text-primary: var(--neutral-100);
+            --text-secondary: var(--neutral-300);
+            --text-tertiary: var(--neutral-500);
+            --bg-primary: var(--neutral-1100);
+            --bg-secondary: var(--neutral-1000);
+            --border-light: rgba(255, 255, 255, 0.1);
+            
+            --glass-bg: rgba(15, 23, 42, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            
+            /* Enhanced dark mode colors */
+            --primary: #5b6ef9;
+            --secondary: #a78bfa;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            min-height: 100vh;
+            transition: var(--transition-slow);
+            font-size: var(--text-base);
+            font-weight: 400;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-6);
+        }
+        
+        /* Header Styles - Enhanced */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-8);
+            padding: var(--spacing-5) var(--spacing-6);
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            font-weight: 800;
+            font-size: var(--text-2xl);
+            color: var(--text-primary);
+            transition: var(--transition);
+            letter-spacing: -0.5px;
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        .logo span {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+        
+        .logo span::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+            transform-origin: right;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .logo:hover span::after {
+            transform-origin: left;
+            transform: scaleX(1);
+        }
+        
+        .logo i {
+            font-size: 1.8rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-4);
+        }
+        
+        /* Ambient background elements - Enhanced */
+        .ambient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .ambient-particle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.1;
+            filter: blur(40px);
+            animation: float 20s infinite ease-in-out;
+            background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%);
+        }
+        
+        .ambient-line {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, var(--primary-light), transparent);
+            animation: lineFlow 15s infinite linear;
+            opacity: 0.1;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(10%, -5%) scale(1.1); }
+            50% { transform: translate(5%, 5%) scale(0.9); }
+            75% { transform: translate(-5%, -3%) scale(1.05); }
+        }
+        
+        @keyframes lineFlow {
+            0% { transform: translateX(-100%) rotate(0deg); }
+            100% { transform: translateX(100vw) rotate(360deg); }
+        }
+        
+        /* Navigation - Enhanced */
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-8);
+            padding: 0;
+            background: none;
+            position: relative;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: var(--spacing-2);
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            padding: var(--spacing-2);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            position: relative;
+            border: 1px solid var(--glass-border);
+        }
+        
+        .nav-tabs button {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            padding: var(--spacing-3) var(--spacing-5);
+            border: none;
+            border-radius: var(--radius-lg);
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            font-size: var(--text-sm);
+            position: relative;
+            z-index: 2;
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        .nav-tabs button.active {
+            background: var(--bg-primary);
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .nav-tabs button:hover:not(.active) {
+            color: var(--primary-light);
+        }
+
+        .dark-mode .nav-tabs button:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            padding: var(--spacing-3) var(--spacing-4);
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            color: var(--text-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        .logout-btn:hover {
+            background: var(--primary-light);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-primary);
+        }
+
+        .dark-mode .logout-btn:hover {
+            background: var(--primary);
+        }
+        
+        /* Cards - Enhanced with glassmorphism and gradient borders */
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-8);
+            margin-bottom: var(--spacing-8);
+            box-shadow: var(--shadow-lg);
+            transition: var(--transition-slow);
+            border: 1px solid var(--glass-border);
+            overflow: hidden;
+            position: relative;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            background: var(--primary-gradient);
+            border-radius: var(--radius-2xl);
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: var(--shadow-xl);
+            transform: translateY(-4px);
+        }
+        
+        .card:hover::before {
+            opacity: 0.1;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-6);
+        }
+        
+        .card-title {
+            font-size: var(--text-2xl);
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .card-title i {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.4rem;
+        }
+        
+        /* Dashboard - Enhanced */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-8);
+        }
+        
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: var(--spacing-6);
+        }
+        
+        .sensor-item {
+            text-align: center;
+            padding: var(--spacing-6) var(--spacing-5);
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: var(--radius-2xl);
+            transition: var(--transition-bounce);
+            border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .sensor-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        
+        .sensor-item:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .sensor-item:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .sensor-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-5);
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: var(--transition);
+        }
+        
+        .sensor-item:hover .sensor-icon {
+            transform: scale(1.15);
+        }
+        
+        .sensor-value {
+            font-size: var(--text-4xl);
+            font-weight: 800;
+            color: var(--text-primary);
+            margin: var(--spacing-3) 0;
+            font-variant-numeric: tabular-nums;
+            transition: var(--transition);
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: -0.025em;
+        }
+        
+        .sensor-unit {
+            font-size: var(--text-sm);
+            color: var(--text-tertiary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .sensor-name {
+            font-size: var(--text-sm);
+            color: var(--text-tertiary);
+            font-weight: 500;
+            margin-top: var(--spacing-2);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        /* Controls - Enhanced */
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: var(--spacing-8);
+        }
+        
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: var(--spacing-6);
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: var(--radius-2xl);
+            transition: var(--transition-bounce);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        
+        .control-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        
+        .control-item:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .control-item:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .control-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-5);
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: var(--transition);
+        }
+        
+        .control-item:hover .control-icon {
+            transform: scale(1.15);
+        }
+        
+        .control-name {
+            font-weight: 600;
+            margin-bottom: var(--spacing-5);
+            color: var(--text-secondary);
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        /* Toggle Switch - Enhanced */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 32px;
+            margin: var(--spacing-4) 0;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--neutral-500);
+            transition: .4s;
+            border-radius: 34px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 24px;
+            width: 24px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: var(--shadow-md);
+        }
+        
+        input:checked + .slider {
+            background: var(--primary-gradient);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(28px);
+        }
+        
+        .control-status {
+            font-weight: 700;
+            margin-top: var(--spacing-3);
+            font-size: var(--text-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            font-family: 'Outfit', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .control-status::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            transition: var(--transition);
+        }
+        
+        .status-on {
+            color: var(--success);
+        }
+
+        .status-on::before {
+            background-color: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+        
+        .status-off {
+            color: var(--text-tertiary);
+        }
+
+        .status-off::before {
+            background-color: var(--text-tertiary);
+        }
+        
+        /* Alerts - Enhanced */
+        .alert {
+            padding: var(--spacing-5);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.08) 100%);
+            border-left: 4px solid var(--danger);
+            margin-bottom: var(--spacing-5);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-4);
+            transition: var(--transition);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+        }
+
+        .dark-mode .alert {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%);
+        }
+        
+        .alert-icon {
+            color: var(--danger);
+            font-size: 1.5rem;
+        }
+        
+        /* Login - Redesigned for premium feel */
+        .login-container {
+            max-width: 480px;
+            margin: 100px auto;
+            padding: var(--spacing-12);
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-xl);
+            text-align: center;
+            border: 1px solid var(--glass-border);
+            transition: var(--transition-slow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            height: 6px;
+            background: var(--primary-gradient);
+        }
+
+        .login-logo {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-8);
+            display: inline-flex;
+            padding: var(--spacing-5);
+            border-radius: var(--radius-2xl);
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            z-index: 2;
+            position: relative;
+        }
+        
+        .login-logo i {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .login-title {
+            font-size: var(--text-4xl);
+            font-weight: 800;
+            margin-bottom: var(--spacing-3);
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.025em;
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        .login-subtitle {
+            color: var(--text-tertiary);
+            margin-bottom: var(--spacing-10);
+            font-size: var(--text-lg);
+            line-height: 1.6;
+        }
+        
+        .form-group {
+            margin-bottom: var(--spacing-6);
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-2);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: var(--spacing-4) var(--spacing-5);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            font-size: var(--text-base);
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(56, 88, 255, 0.15);
+        }
+        
+        .login-container button {
+            width: 100%;
+            padding: var(--spacing-4);
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            font-size: var(--text-base);
+            font-weight: 600;
+            transition: var(--transition);
+            margin-top: var(--spacing-3);
+            font-family: 'Outfit', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-container button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .login-container button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-primary);
+        }
+        
+        .login-container button:hover::before {
+            left: 100%;
+        }
+        
+        .error {
+            color: var(--danger);
+            margin-top: var(--spacing-5);
+            text-align: center;
+            font-weight: 500;
+            padding: var(--spacing-3);
+            border-radius: var(--radius);
+            background: rgba(239, 68, 68, 0.1);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+        }
+        
+        /* History Table - Enhanced */
+        .history-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: var(--spacing-5);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+        }
+        
+        .history-table th, .history-table td {
+            padding: var(--spacing-4) var(--spacing-5);
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        
+        .history-table th {
+            background-color: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            font-weight: 600;
+            color: var(--text-secondary);
+            position: sticky;
+            top: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        .history-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .history-table tr {
+            transition: var(--transition);
+        }
+        
+        .history-table tr:hover {
+            background-color: rgba(56, 88, 255, 0.08);
+        }
+
+        .dark-mode .history-table tr:hover {
+            background-color: rgba(56, 88, 255, 0.12);
+        }
+        
+        /* Theme Toggle - Enhanced */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            padding: var(--spacing-3) var(--spacing-4);
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            color: var(--text-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        .theme-toggle:hover {
+            background: var(--primary-light);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-primary);
+        }
+
+        .dark-mode .theme-toggle:hover {
+            background: var(--primary);
+        }
+        
+        /* Connection Status - Enhanced */
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            padding: var(--spacing-3) var(--spacing-5);
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: 100px;
+            font-size: var(--text-sm);
+            font-weight: 500;
+            transition: var(--transition);
+            border: 1px solid var(--glass-border);
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            position: relative;
+        }
+        
+        .status-indicator.connected {
+            background: var(--success);
+        }
+        
+        .status-indicator.connected::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse-dot 1.5s ease-in-out infinite;
+            opacity: 0.6;
+        }
+        
+        .status-indicator.disconnected {
+            background: var(--danger);
+        }
+        
+        @keyframes pulse-dot {
+            0% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(2); opacity: 0; }
+            100% { transform: scale(1); opacity: 0; }
+        }
+        
+        /* Loading animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Value change animations - Enhanced */
+        @keyframes valueUpdate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); color: var(--primary); }
+            100% { transform: scale(1); }
+        }
+
+        .value-updated {
+            animation: valueUpdate 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        /* Toast notifications - Enhanced */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toast {
+            padding: 16px 24px;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            color: var(--text-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+            transform-origin: top right;
+            border: 1px solid var(--glass-border);
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left-color: var(--danger);
+        }
+
+        .toast.warning {
+            border-left-color: var(--warning);
+        }
+
+        @keyframes toastIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes toastOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        /* Focus styles for accessibility */
+        button:focus-visible,
+        input:focus-visible,
+        .switch input:focus-visible + .slider {
+            outline: 2px solid var(--primary-light);
+            outline-offset: 2px;
+        }
+
+        /* Enhanced sensor value animation */
+        @keyframes sensorPulse {
+            0% { box-shadow: 0 0 0 0 rgba(56, 88, 255, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(56, 88, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(56, 88, 255, 0); }
+        }
+
+        .sensor-item.value-updated {
+            animation: sensorPulse 1.5s;
+        }
+
+        /* LED glow effect - Enhanced */
+        .led-on {
+            position: relative;
+        }
+
+        .led-on::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: inherit;
+            background: rgba(56, 88, 255, 0.1);
+            animation: ledPulse 2s infinite;
+            z-index: -1;
+        }
+
+        @keyframes ledPulse {
+            0% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+            100% { opacity: 0.3; }
+        }
+
+        /* Gas alert animation - Enhanced */
+        .gas-alert {
+            animation: alertShake 0.5s ease, alertPulse 2s infinite 0.5s;
+        }
+
+        @keyframes alertShake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        @keyframes alertPulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        /* Last updated timestamp - Enhanced */
+        .last-updated {
+            font-size: var(--text-sm);
+            color: var(--text-tertiary);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* FAB (Floating Action Button) */
+        .fab {
+            position: fixed;
+            bottom: var(--spacing-6);
+            right: var(--spacing-6);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-xl);
+            transition: var(--transition-bounce);
+            z-index: 100;
+            border: none;
+        }
+
+        .fab:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: var(--shadow-primary);
+        }
+
+        .fab i {
+            font-size: 1.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .nav {
+                flex-direction: column;
+                gap: var(--spacing-5);
+            }
+            
+            .nav-tabs {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .header-controls {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .sensor-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            header {
+                flex-direction: column;
+                gap: var(--spacing-5);
+                text-align: center;
+            }
+
+            .card-header {
+                flex-direction: column;
+                gap: var(--spacing-4);
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .sensor-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-panel {
+                grid-template-columns: 1fr;
+            }
+            
+            .login-container {
+                padding: var(--spacing-8) var(--spacing-5);
+                margin: 60px auto;
+            }
+
+            .container {
+                padding: var(--spacing-4);
+            }
+
+            .fab {
+                bottom: var(--spacing-4);
+                right: var(--spacing-4);
+                width: 50px;
+                height: 50px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <div id="toast-container" class="toast-container"></div>
+    <div class="ambient-bg" id="ambient-bg"></div>
+    <button class="fab" id="emergency-btn" aria-label="Emergency actions">
+        <i class="fas fa-bolt"></i>
+    </button>
+
+    <script type="text/babel">
+        // Import configuration
+        const MQTT_CONFIG = {
+            brokerUrl: 'wss://broker.hivemq.com:8884/mqtt',
+            topics: {
+                sensorData: 'esp32/sensors/data',
+                ledControl: 'esp32/led/control',
+                doorControl: 'esp32/door/control',
+                ledStatus: 'esp32/led/status',
+                doorStatus: 'esp32/door/status'
+            }
+        };
+
+        const APP_CONFIG = {
+            gasAlertThreshold: 2000
+        };
+
+        // Hardcoded users for simple authentication
+        const users = [
+            { email: 'user1@user.com', password: 'user1user1user1' },
+            { email: 'user2@user.com', password: 'user2user2user2' },
+            { email: 'user3@user.com', password: 'user3user3user3' }
+        ];
+
+        // Create enhanced ambient background
+        function createAmbientBackground() {
+            const container = document.getElementById('ambient-bg');
+            if (!container) return;
+            
+            // Clear any existing particles
+            container.innerHTML = '';
+            
+            // Create particles based on screen size
+            const particleCount = Math.floor((window.innerWidth * window.innerHeight) / 20000);
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'ambient-particle';
+                
+                // Randomize size, position and animation
+                const size = Math.random() * 150 + 100;
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                const duration = Math.random() * 25 + 20;
+                const delay = Math.random() * 10;
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${posX}%`;
+                particle.style.top = `${posY}%`;
+                particle.style.animationDuration = `${duration}s`;
+                particle.style.animationDelay = `-${delay}s`;
+                
+                // Random color from brand palette
+                const colors = [
+                    'radial-gradient(circle, rgba(56,88,255,0.15) 0%, transparent 70%)',
+                    'radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)',
+                    'radial-gradient(circle, rgba(255,90,122,0.15) 0%, transparent 70%)'
+                ];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                container.appendChild(particle);
+            }
+            
+            // Add some flowing lines
+            const lineCount = 5;
+            for (let i = 0; i < lineCount; i++) {
+                const line = document.createElement('div');
+                line.className = 'ambient-line';
+                
+                const width = Math.random() * 200 + 100;
+                const top = Math.random() * 100;
+                const rotation = Math.random() * 360;
+                const duration = Math.random() * 20 + 15;
+                const delay = Math.random() * 5;
+                
+                line.style.width = `${width}px`;
+                line.style.top = `${top}%`;
+                line.style.transform = `rotate(${rotation}deg)`;
+                line.style.animationDuration = `${duration}s`;
+                line.style.animationDelay = `-${delay}s`;
+                
+                container.appendChild(line);
+            }
+        }
+
+        // Toast notification system
+        function showToast(message, type = 'success') {
+            const toastContainer = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            let icon = 'check-circle';
+            if (type === 'error') icon = 'exclamation-circle';
+            if (type === 'warning') icon = 'exclamation-triangle';
+            
+            toast.innerHTML = `
+                <i class="fas fa-${icon}"></i>
+                <span>${message}</span>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Remove toast after animation completes
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toastContainer.removeChild(toast);
+                }
+            }, 3000);
+        }
+
+        // Custom hook for MQTT connection
+        const useMqtt = (user, topics, onMessage) => {
+            const [client, setClient] = React.useState(null);
+            const [isConnected, setIsConnected] = React.useState(false);
+
+            React.useEffect(() => {
+                if (!user) return;
+
+                const mqttClient = mqtt.connect(MQTT_CONFIG.brokerUrl, {
+                    clientId: 'web-client-' + Math.random().toString(16).substr(2, 8)
+                });
+
+                mqttClient.on('connect', () => {
+                    console.log('Connected to MQTT broker');
+                    setIsConnected(true);
+                    showToast('Connected to IoT network', 'success');
+                    
+                    // Subscribe to all necessary topics
+                    Object.values(topics).forEach(topic => {
+                        mqttClient.subscribe(topic, (err) => {
+                            if (!err) console.log(`Subscribed to ${topic}`);
+                        });
+                    });
+                });
+
+                mqttClient.on('message', onMessage);
+
+                mqttClient.on('error', (err) => {
+                    console.error('MQTT error:', err);
+                    setIsConnected(false);
+                    showToast('Connection lost. Trying to reconnect...', 'warning');
+                });
+
+                mqttClient.on('close', () => {
+                    setIsConnected(false);
+                });
+
+                mqttClient.on('reconnect', () => {
+                    console.log('Reconnecting to MQTT broker...');
+                });
+
+                setClient(mqttClient);
+
+                return () => {
+                    if (mqttClient) {
+                        mqttClient.end();
+                        setIsConnected(false);
+                    }
+                };
+            }, [user]);
+
+            return { client, isConnected };
+        };
+
+        // Login Page Component
+        function LoginPage({ onLogin }) {
+            const [email, setEmail] = React.useState('');
+            const [password, setPassword] = React.useState('');
+            const [error, setError] = React.useState('');
+            const [isLoading, setIsLoading] = React.useState(false);
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setIsLoading(true);
+                
+                // Simulate network delay for better UX
+                await new Promise(resolve => setTimeout(resolve, 800));
+                
+                if (onLogin(email, password)) {
+                    setError('');
+                } else {
+                    setError('Invalid email or password');
+                }
+                
+                setIsLoading(false);
+            };
+
+            return (
+                <div className="login-container">
+                    <div className="login-logo">
+                        <i className="fas fa-leaf"></i>
+                    </div>
+                    <h2 className="login-title">AetherSense</h2>
+                    <p className="login-subtitle">Premium environmental monitoring with real-time insights</p>
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <label>Email</label>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                                placeholder="Enter your email"
+                                disabled={isLoading}
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Password</label>
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                placeholder="Enter your password"
+                                disabled={isLoading}
+                            />
+                        </div>
+                        <button type="submit" disabled={isLoading}>
+                            {isLoading ? (
+                                <>
+                                    <i className="fas fa-spinner fa-spin"></i> Signing In...
+                                </>
+                            ) : (
+                                'Sign In'
+                            )}
+                        </button>
+                        {error && <div className="error">{error}</div>}
+                    </form>
+                </div>
+            );
+        }
+
+        // Sensor Display Component
+        function SensorDisplay({ sensorData }) {
+            return (
+                <div className="sensor-grid">
+                    <div className={`sensor-item ${sensorData.temperatureUpdated ? 'value-updated' : ''}`}>
+                        <div className="sensor-icon">
+                            <i className="fas fa-temperature-high"></i>
+                        </div>
+                        <div className="sensor-value">
+                            {sensorData.temperature || 0}°C
+                        </div>
+                        <div className="sensor-unit">celsius</div>
+                        <div className="sensor-name">Temperature</div>
+                    </div>
+                    <div className={`sensor-item ${sensorData.humidityUpdated ? 'value-updated' : ''}`}>
+                        <div className="sensor-icon">
+                            <i className="fas fa-tint"></i>
+                        </div>
+                        <div className="sensor-value">
+                            {sensorData.humidity || 0}%
+                        </div>
+                        <div className="sensor-unit">percent</div>
+                        <div className="sensor-name">Humidity</div>
+                    </div>
+                    <div className={`sensor-item ${sensorData.gasUpdated ? 'value-updated' : ''}`}>
+                        <div className="sensor-icon">
+                            <i className="fas fa-wind"></i>
+                        </div>
+                        <div className="sensor-value">
+                            {sensorData.gas || 0}
+                        </div>
+                        <div className="sensor-unit">ppm</div>
+                        <div className="sensor-name">Gas Level</div>
+                    </div>
+                    <div className={`sensor-item ${sensorData.ldrUpdated ? 'value-updated' : ''}`}>
+                        <div className="sensor-icon">
+                            <i className="fas fa-lightbulb"></i>
+                        </div>
+                        <div className="sensor-value">
+                            {sensorData.ldr || 'LIGHT'}
+                        </div>
+                        <div className="sensor-unit">level</div>
+                        <div className="sensor-name">Light Level</div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Control Panel Component
+        function ControlPanel({ sensorData, publishControl, topics }) {
+            const handleLedControl = (state) => {
+                publishControl(topics.ledControl, state ? 'ON' : 'OFF', 'LED');
+            };
+
+            const handleDoorControl = (state) => {
+                publishControl(topics.doorControl, state ? 'OPEN' : 'CLOSE', 'Door');
+            };
+
+            return (
+                <div className="control-panel">
+                    <div className={`control-item ${sensorData.led ? 'led-on' : ''}`}>
+                        <div className="control-icon">
+                            <i className="fas fa-lightbulb"></i>
+                        </div>
+                        <div className="control-name">LED Light</div>
+                        <label className="switch">
+                            <input 
+                                type="checkbox" 
+                                checked={sensorData.led}
+                                onChange={(e) => handleLedControl(e.target.checked)}
+                                aria-label="Toggle LED light"
+                            />
+                            <span className="slider"></span>
+                        </label>
+                        <div className={`control-status ${sensorData.led ? 'status-on' : 'status-off'}`}>
+                            {sensorData.led ? 'ON' : 'OFF'}
+                        </div>
+                    </div>
+                    <div className="control-item">
+                        <div className="control-icon">
+                            <i className="fas fa-door-closed"></i>
+                        </div>
+                        <div className="control-name">Door Lock</div>
+                        <label className="switch">
+                            <input 
+                                type="checkbox" 
+                                checked={sensorData.door}
+                                onChange={(e) => handleDoorControl(e.target.checked)}
+                                aria-label="Toggle door lock"
+                            />
+                            <span className="slider"></span>
+                        </label>
+                        <div className={`control-status ${sensorData.door ? 'status-on' : 'status-off'}`}>
+                            {sensorData.door ? 'OPEN' : 'CLOSED'}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Dashboard Component
+        function Dashboard({ sensorData, publishControl, topics, isConnected, lastUpdated }) {
+            return (
+                <div className="dashboard">
+                    <div className="card" style={{gridColumn: '1 / -1'}}>
+                        <div className="card-header">
+                            <h3 className="card-title">
+                                <i className="fas fa-chart-line"></i> Environmental Sensors
+                            </h3>
+                            <div style={{display: 'flex', alignItems: 'center', gap: '20px'}}>
+                                <div className="last-updated">
+                                    <i className="far fa-clock"></i>
+                                    Last update: {lastUpdated}
+                                </div>
+                                <div className="connection-status">
+                                    <div className={`status-indicator ${isConnected ? 'connected' : 'disconnected'}`}></div>
+                                    <span>{isConnected ? 'Connected to IoT' : 'Disconnected'}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <SensorDisplay sensorData={sensorData} />
+                    </div>
+                    
+                    <div className="card">
+                        <div className="card-header">
+                            <h3 className="card-title">
+                                <i className="fas fa-sliders-h"></i> Device Controls
+                            </h3>
+                        </div>
+                        <ControlPanel 
+                            sensorData={sensorData} 
+                            publishControl={publishControl}
+                            topics={topics}
+                        />
+                    </div>
+                    
+                    {sensorData.gas > APP_CONFIG.gasAlertThreshold && (
+                        <div className="card gas-alert" style={{gridColumn: '1 / -1'}}>
+                            <div className="alert" role="alert" aria-live="assertive">
+                                <i className="fas fa-exclamation-triangle alert-icon"></i>
+                                <div>
+                                    <strong>Gas Alert!</strong> High gas levels detected: {sensorData.gas} ppm
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // History Page Component
+        function HistoryPage({ historyData }) {
+            React.useEffect(() => {
+                // Simulate fetching history data
+                const mockData = [
+                    { id: 1, timestamp: '2025-08-28 10:30:15', temperature: 25, humidity: 45, gas: 1200, event: 'Normal' },
+                    { id: 2, timestamp: '2025-08-28 10:25:32', temperature: 24, humidity: 47, gas: 2100, event: 'Gas Alert' },
+                    { id: 3, timestamp: '2025-08-28 10:20:18', temperature: 26, humidity: 43, gas: 1100, event: 'Normal' },
+                    { id: 4, timestamp: '2025-08-28 10:15:42', temperature: 23, humidity: 49, gas: 1050, event: 'Normal' },
+                ];
+                // setHistoryData(mockData);
+            }, []);
+
+            return (
+                <div className="card">
+                    <div className="card-header">
+                        <h3 className="card-title">
+                            <i className="fas fa-history"></i> Sensor History
+                        </h3>
+                    </div>
+                    <table className="history-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Temperature</th>
+                                <th>Humidity</th>
+                                <th>Gas Level</th>
+                                <th>Event</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {historyData.map(record => (
+                                <tr key={record.id}>
+                                    <td>{record.timestamp}</td>
+                                    <td>{record.temperature}°C</td>
+                                    <td>{record.humidity}%</td>
+                                    <td>{record.gas} ppm</td>
+                                    <td>
+                                        <span className={`status-${record.event === 'Gas Alert' ? 'off' : 'on'}`}>
+                                            {record.event}
+                                        </span>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    {historyData.length === 0 && (
+                        <div style={{textAlign: 'center', padding: '60px', color: 'var(--text-tertiary)'}}>
+                            <i className="fas fa-inbox" style={{fontSize: '3rem', marginBottom: '20px', opacity: 0.5}}></i>
+                            <p>No history data available</p>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // Alerts Page Component
+        function AlertsPage({ alerts }) {
+            return (
+                <div className="card">
+                    <div className="card-header">
+                        <h3 className="card-title">
+                            <i className="fas fa-bell"></i> System Alerts
+                        </h3>
+                    </div>
+                    {alerts.length === 0 ? (
+                        <div style={{textAlign: 'center', padding: '60px', color: 'var(--text-tertiary)'}}>
+                            <i className="fas fa-bell-slash" style={{fontSize: '3rem', marginBottom: '20px', opacity: 0.5}}></i>
+                            <p>No alerts</p>
+                        </div>
+                    ) : (
+                        alerts.map(alert => (
+                            <div key={alert.id} className="alert" role="alert">
+                                <i className="fas fa-exclamation-circle alert-icon"></i>
+                                <div>
+                                    <strong>{alert.timestamp} - {alert.severity} Priority:</strong> {alert.message}
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            );
+        }
+
+        // Navigation Component
+        function Navigation({ currentView, onViewChange, onLogout, onToggleTheme, isDarkMode }) {
+            return (
+                <div className="nav">
+                    <div className="nav-tabs">
+                        <button 
+                            className={currentView === 'dashboard' ? 'active' : ''}
+                            onClick={() => onViewChange('dashboard')}
+                            aria-label="Dashboard view"
+                        >
+                            <i className="fas fa-chart-line"></i> Dashboard
+                        </button>
+                        <button 
+                            className={currentView === 'history' ? 'active' : ''}
+                            onClick={() => onViewChange('history')}
+                            aria-label="History view"
+                        >
+                            <i className="fas fa-history"></i> History
+                        </button>
+                        <button 
+                            className={currentView === 'alerts' ? 'active' : ''}
+                            onClick={() => onViewChange('alerts')}
+                            aria-label="Alerts view"
+                        >
+                            <i className="fas fa-bell"></i> Alerts
+                        </button>
+                    </div>
+                    <div style={{display: 'flex', gap: '12px'}}>
+                        <button className="theme-toggle" onClick={onToggleTheme} aria-label="Toggle theme">
+                            <i className={isDarkMode ? 'fas fa-sun' : 'fas fa-moon'}></i>
+                            {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+                        </button>
+                        <button className="logout-btn" onClick={onLogout} aria-label="Logout">
+                            <i className="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        // Main App Component
+        function App() {
+            const [user, setUser] = React.useState(null);
+            const [view, setView] = React.useState('dashboard');
+            const [isDarkMode, setIsDarkMode] = React.useState(() => {
+                const stored = localStorage.getItem('smartenv:theme');
+                return stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            });
+            const [sensorData, setSensorData] = React.useState({
+                temperature: 0,
+                humidity: 0,
+                gas: 0,
+                ldr: 'LIGHT',
+                led: false,
+                door: false,
+                temperatureUpdated: false,
+                humidityUpdated: false,
+                gasUpdated: false,
+                ldrUpdated: false
+            });
+            const [historyData, setHistoryData] = React.useState([]);
+            const [alerts, setAlerts] = React.useState([]);
+            const [lastUpdated, setLastUpdated] = React.useState('Never');
+
+            // Toggle dark mode
+            React.useEffect(() => {
+                if (isDarkMode) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+                localStorage.setItem('smartenv:theme', isDarkMode ? 'dark' : 'light');
+                
+                // Recreate ambient background with new theme
+                createAmbientBackground();
+            }, [isDarkMode]);
+
+            // Create ambient background on mount
+            React.useEffect(() => {
+                createAmbientBackground();
+                
+                // Update on window resize
+                const handleResize = () => createAmbientBackground();
+                window.addEventListener('resize', handleResize);
+                
+                return () => window.removeEventListener('resize', handleResize);
+            }, []);
+
+            // Setup emergency button handler
+            React.useEffect(() => {
+                const emergencyBtn = document.getElementById('emergency-btn');
+                if (emergencyBtn) {
+                    emergencyBtn.addEventListener('click', () => {
+                        showToast('Emergency protocols activated', 'warning');
+                        // Here you could add code to send emergency commands
+                    });
+                }
+            }, []);
+
+            // Handle MQTT messages
+            const handleMqttMessage = React.useCallback((topic, message) => {
+                const msg = message.toString();
+                console.log('Received message:', topic, msg);
+                
+                try {
+                    if (topic === MQTT_CONFIG.topics.sensorData) {
+                        const data = JSON.parse(msg);
+                        console.log('Received sensor data:', data);
+                        
+                        const updates = {
+                            temperature: data.temperature || data.T || sensorData.temperature,
+                            humidity: data.humidity || data.H || sensorData.humidity,
+                            gas: data.gas || data.Gas || sensorData.gas,
+                            ldr: data.ldr || data.LDR || sensorData.ldr,
+                            temperatureUpdated: true,
+                            humidityUpdated: true,
+                            gasUpdated: true,
+                            ldrUpdated: true
+                        };
+                        
+                        setSensorData(prev => ({
+                            ...prev,
+                            ...updates
+                        }));
+                        
+                        // Update last updated timestamp
+                        setLastUpdated(new Date().toLocaleTimeString());
+                        
+                        // Reset update flags after animation would complete
+                        setTimeout(() => {
+                            setSensorData(prev => ({
+                                ...prev,
+                                temperatureUpdated: false,
+                                humidityUpdated: false,
+                                gasUpdated: false,
+                                ldrUpdated: false
+                            }));
+                        }, 500);
+
+                        // Check for alerts
+                        const gasValue = data.gas || data.Gas || 0;
+                        if (gasValue > APP_CONFIG.gasAlertThreshold) {
+                            const newAlert = {
+                                id: Date.now(),
+                                timestamp: new Date().toLocaleString(),
+                                message: `High gas level detected: ${gasValue} ppm`,
+                                severity: 'High'
+                            };
+                            setAlerts(prev => [newAlert, ...prev.slice(0, 9)]); // Keep only last 10 alerts
+                            showToast('Gas alert! High levels detected.', 'warning');
+                        }
+                    } 
+                    else if (topic === MQTT_CONFIG.topics.ledStatus) {
+                        const isOn = msg === 'ON';
+                        setSensorData(prev => ({ ...prev, led: isOn }));
+                    }
+                    else if (topic === MQTT_CONFIG.topics.doorStatus) {
+                        const isOpen = msg === 'OPEN';
+                        setSensorData(prev => ({ ...prev, door: isOpen }));
+                    }
+                } catch (error) {
+                    console.error('Error parsing MQTT message:', error);
+                }
+            }, []);
+
+            // Setup MQTT connection
+            const { client, isConnected } = useMqtt(user, MQTT_CONFIG.topics, handleMqttMessage);
+
+            // Handle login
+            const handleLogin = (email, password) => {
+                const foundUser = users.find(u => u.email === email && u.password === password);
+                if (foundUser) {
+                    setUser(foundUser);
+                    // Store session in localStorage
+                    localStorage.setItem('smartenv:user', JSON.stringify({ email: foundUser.email }));
+                    return true;
+                }
+                return false;
+            };
+
+            // Check for existing session on load
+            React.useEffect(() => {
+                const savedUser = localStorage.getItem('smartenv:user');
+                if (savedUser) {
+                    try {
+                        const userData = JSON.parse(savedUser);
+                        // In a real app, we would verify the session is still valid
+                        setUser({ email: userData.email });
+                    } catch (e) {
+                        console.error('Error parsing saved user data:', e);
+                    }
+                }
+            }, []);
+
+            // Handle logout
+            const handleLogout = () => {
+                if (client) {
+                    client.end();
+                }
+                setUser(null);
+                localStorage.removeItem('smartenv:user');
+            };
+
+            // Toggle theme
+            const handleToggleTheme = () => {
+                setIsDarkMode(!isDarkMode);
+            };
+
+            // Publish control commands
+            const publishControl = (topic, message, device) => {
+                // Optimistic UI update
+                if (topic === MQTT_CONFIG.topics.ledControl) {
+                    setSensorData(prev => ({ ...prev, led: message === 'ON' }));
+                    showToast(`LED turned ${message}`, 'success');
+                } else if (topic === MQTT_CONFIG.topics.doorControl) {
+                    setSensorData(prev => ({ ...prev, door: message === 'OPEN' }));
+                    showToast(`Door ${message.toLowerCase()}`, 'success');
+                }
+                
+                if (client && isConnected) {
+                    client.publish(topic, message);
+                    console.log(`Published to ${topic}: ${message}`);
+                } else {
+                    console.error('MQTT client not connected');
+                    showToast('Not connected to device', 'error');
+                }
+            };
+
+            if (!user) {
+                return <LoginPage onLogin={handleLogin} />;
+            }
+
+            return (
+                <div className="container">
+                    <header>
+                        <div className="logo">
+                            <i className="fas fa-leaf"></i>
+                            <span>AetherSense</span>
+                        </div>
+                        <div className="header-controls">
+                            <div className="connection-status">
+                                <div className={`status-indicator ${isConnected ? 'connected' : 'disconnected'}`}></div>
+                                <span>{isConnected ? 'Connected to IoT' : 'Disconnected'}</span>
+                            </div>
+                        </div>
+                    </header>
+                    
+                    <Navigation 
+                        currentView={view}
+                        onViewChange={setView}
+                        onLogout={handleLogout}
+                        onToggleTheme={handleToggleTheme}
+                        isDarkMode={isDarkMode}
+                    />
+                    
+                    {view === 'dashboard' && (
+                        <Dashboard 
+                            sensorData={sensorData} 
+                            publishControl={publishControl}
+                            topics={MQTT_CONFIG.topics}
+                            isConnected={isConnected}
+                            lastUpdated={lastUpdated}
+                        />
+                    )}
+                    {view === 'history' && <HistoryPage historyData={historyData} />}
+                    {view === 'alerts' && <AlertsPage alerts={alerts} />}
+                </div>
+            );
+        }
+
+        // Render the app
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
